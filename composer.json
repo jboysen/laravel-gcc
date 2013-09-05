@@ -1,0 +1,34 @@
+{
+    "name": "jboysen/laravel-closure-compiler",
+    "keywords": ["minify", "laravel", "closure", "compiler"],
+    "description": "Use Google Closure Compiler to minify javascript files in Laravel 4.",
+    "licence": "MIT",
+    "authors": [
+        {
+            "name": "Jakob Jakobsen Boysen",
+            "email": "jakob@jboysen.dk"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.0.x",
+        "neeckeloo/closure-compiler-php": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/neeckeloo/ClosureCompilerPHP"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+        ],
+        "psr-0": {
+            "Jboysen\\LaravelGcc": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "minimum-stability": "dev"
+}
