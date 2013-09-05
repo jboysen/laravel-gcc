@@ -38,9 +38,9 @@ class LaravelGccServiceProvider extends ServiceProvider {
      */
     protected function registerGCCompiler()
     {
-        $this->app['gccompiler'] = $this->app->share(function() 
+        $this->app['gccompiler'] = $this->app->share(function($app) 
         {
-            return new GCCompiler;
+            return new GCCompiler($app['config']);
         });
     }
     

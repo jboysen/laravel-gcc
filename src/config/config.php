@@ -7,7 +7,7 @@ return array(
     | Environment
     |--------------------------------------------------------------------------
     |
-    | env:  enable in the environments listed
+    | env:  Enable in the environments listed
     |
     */
     

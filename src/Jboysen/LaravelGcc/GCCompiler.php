@@ -2,11 +2,6 @@
 
 namespace Jboysen\LaravelGcc;
 
-/**
- * Description of GCCompiler
- *
- * @author jakob
- */
 class GCCompiler
 {
     /**
@@ -37,6 +32,21 @@ class GCCompiler
      * that needs recompilation
      */
     private $prefix = '';
+    
+    /**
+     *
+     * @var \Illuminate\Config\Repository
+     */
+    private $config = null;
+    
+    /**
+     * 
+     * @param \Illuminate\Config\Repository $config
+     */
+    public function __construct($config)
+    {
+        $this->config = $config;
+    }
     
     /**
      * Creates an array with the absolute path to the actual file as value,
@@ -122,7 +132,7 @@ class GCCompiler
      */
     private function getMode()
     {
-        $mode = \Config::get('laravel-gcc::gcc_mode', 1);
+        $mode = $this->config->get('laravel-gcc::gcc_mode', 1);
         switch($mode)
         {
             case static::MODE_WHITESPACE:
@@ -148,13 +158,13 @@ class GCCompiler
     
     public function getCompiledJsPath()
     {
-        $path = \Config::get('laravel-gcc::build_path', 'js-built');
+        $path = $this->config->get('laravel-gcc::build_path', 'js-built');
         return \URL::to($path . '/' . $this->filename . '.js');
     }
     
     public function getJsDir()
     {
-        return \Config::get('laravel-gcc::public_path', 'js');
+        return $this->config->get('laravel-gcc::public_path', 'js');
     }
     
     private function calculateFilename()
