@@ -195,23 +195,39 @@ class GCCompiler
         if (!\File::exists($path))
             return \App::abort(404);
         
-        $header = \Request::header('If-Modified-Since');
+        $headerMod = \Request::header('If-Modified-Since');
+                
+        $headers = array(
+            'Content-Type' => 'text/javascript',
+            'Last-Modified' => gmdate('D, d M Y H:i:s \G\M\T', \File::lastModified($path))
+        );
         
-        if ($header && strtotime($header) == \File::lastModified($path))
+        $headerGzip = \Request::header('Accept-Encoding');
+        
+        if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode'))
         {
-            return \Response::make(null, 304, array(
-                'Content-Type' => 'text/javascript',
-                'Last-Modified' => gmdate('D, d M Y H:i:s \G\M\T', \File::lastModified($path))
-            ));
+            $headers['Content-Encoding'] = 'gzip';
+        }
+        
+        if ($headerMod && strtotime($headerMod) == \File::lastModified($path))
+        {
+            return \Response::make(null, 304, $headers);
         } 
         else 
         {
-            return \Response::make(\File::get($path), 200, array(
-                'Content-Type' => 'text/javascript',
-                'Last-Modified' => gmdate('D, d M Y H:i:s \G\M\T', \File::lastModified($path)),
+            $contents = \File::get($path);
+        
+            if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode'))
+            {
+                $contents = gzencode($contents, 9);
+            }
+        
+            $headers = array_merge($headers, array(
                 'Cache-Control' => 'max-age=' . 60*60*24*7,
-                'Expires' => gmdate('D, d M Y H:i:s \G\M\T', time() + 60*60*24*7)
+                'Expires' => gmdate('D, d M Y H:i:s \G\M\T', time() + 60*60*24*7),
+                'Content-Length' => strlen($contents)
             ));
+            return \Response::make($contents, 200, $headers);
         }
     }
     
