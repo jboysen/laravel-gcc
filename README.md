@@ -7,7 +7,7 @@ This Laravel4 package adds a view-helper `javascript_compiled()`.
 
 Install it via Composer by adding the following to your `composer.json`-file:
 
-    "jboysen/laravel-gcc": "dev-master"
+    "jboysen/laravel-gcc": "1.*"
 
 NOTE: *you might get an error like `zendframework/zend-http dev-master requires zendframework/zend-stdlib dev-master -> no matching package found.`, just ignore that and run composer again...* 
 
