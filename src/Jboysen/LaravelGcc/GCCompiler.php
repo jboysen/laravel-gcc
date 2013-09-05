@@ -9,17 +9,42 @@ namespace Jboysen\LaravelGcc;
  */
 class GCCompiler
 {
+    /**
+     * The default path in the storage folder
+     */
     const STORAGE = 'js-built';
     
+    /**
+     * Different modes used
+     */
     const MODE_WHITESPACE = 1;
     const MODE_SIMPLE = 2;
     const MODE_ADVANCED = 3;
     
+    /**
+     * @var array with absolute path to the actual file as value,
+     * and the filename as key
+     */
     private $files = array();
     
+    /**
+     * @var string complete filename (without '.js')
+     */
     private $filename = '';
+    
+    /**
+     * @var string a prefix used to identify old builds of a new build
+     * that needs recompilation
+     */
     private $prefix = '';
     
+    /**
+     * Creates an array with the absolute path to the actual file as value,
+     * and the filename as key
+     * 
+     * @param array $files a string or an array of files
+     * @throws Exception if a file is not present in the file system
+     */
     public function setFiles($files)
     {     
         if (!is_array($files))
@@ -46,6 +71,12 @@ class GCCompiler
         return $this->files;
     }
     
+    /**
+     * Compiles using Google Closure Compiler
+     * 
+     * @param array $files string or array of files
+     * @return boolean whether successful or not
+     */
     public function compile($files = array())
     {
         $this->setFiles($files);
@@ -67,11 +98,6 @@ class GCCompiler
             $compiler->compile();
             $response = $compiler->getCompilerResponse();
             
-            /*if ($response->hasWarnings())
-            {
-                \Log::warning(var_export($response->getWarnings(), true));
-            }*/
-            
             if ($response->hasErrors())
             {
                 \Log::error(var_export($response->getErrors(), true));
@@ -90,6 +116,10 @@ class GCCompiler
         }
     }
     
+    /**
+     * 
+     * @return string Translated mode constant
+     */
     private function getMode()
     {
         $mode = \Config::get('laravel-gcc::gcc_mode', 1);
@@ -105,6 +135,9 @@ class GCCompiler
         }
     }
     
+    /**
+     * Removes old builds of the current build
+     */
     private function cleanupOldFiles()
     {
         foreach (\File::glob(static::storagePath() . '/' . $this->prefix . '_*') as $file)
@@ -140,6 +173,11 @@ class GCCompiler
         return $this->filename;
     }
     
+    /**
+     * 
+     * @param string $filename Of build file
+     * @return \Response Contents if first request, else cache header
+     */
     public static function getCompiledFile($filename)
     {
         $path = static::storagePath($filename);

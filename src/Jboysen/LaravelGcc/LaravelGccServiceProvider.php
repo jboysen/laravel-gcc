@@ -33,6 +33,9 @@ class LaravelGccServiceProvider extends ServiceProvider {
         $this->registerDirectories();
 	}
     
+    /**
+     * Create an instance of the compiler
+     */
     protected function registerGCCompiler()
     {
         $this->app['gccompiler'] = $this->app->share(function() 
@@ -41,6 +44,9 @@ class LaravelGccServiceProvider extends ServiceProvider {
         });
     }
     
+    /**
+     * Register the js-built route based on the config
+     */
     protected function registerRoutes()
     {
 		$this->app->booting(function($app)
@@ -54,6 +60,9 @@ class LaravelGccServiceProvider extends ServiceProvider {
 		});
     }
     
+    /**
+     * Create directories
+     */
     protected function registerDirectories()
     {
         $storagePath = GCCompiler::storagePath();
