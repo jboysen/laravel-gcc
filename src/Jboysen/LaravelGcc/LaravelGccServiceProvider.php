@@ -31,10 +31,13 @@ class LaravelGccServiceProvider extends ServiceProvider {
 		$this->registerGCCompiler();
         $this->registerRoutes();
         $this->registerDirectories();
+        $this->registerCommands();
 	}
     
     /**
      * Create an instance of the compiler
+     * 
+     * @return void
      */
     protected function registerGCCompiler()
     {
@@ -46,6 +49,8 @@ class LaravelGccServiceProvider extends ServiceProvider {
     
     /**
      * Register the js-built route based on the config
+     * 
+     * @return void
      */
     protected function registerRoutes()
     {
@@ -62,6 +67,8 @@ class LaravelGccServiceProvider extends ServiceProvider {
     
     /**
      * Create directories
+     * 
+     * @return void
      */
     protected function registerDirectories()
     {
@@ -72,6 +79,20 @@ class LaravelGccServiceProvider extends ServiceProvider {
             chmod($storagePath, 0757);
         }            
     }
+    
+    /**
+     * 
+     * 
+     * @return void
+     */
+    protected function registerCommands()
+    {
+        $this->app['command.gcc.build'] = $this->app->share(function()
+        {
+            return new BuildCommand;
+        });
+        $this->commands('command.gcc.build');
+    }
 
 	/**
 	 * Get the services provided by the provider.
@@ -80,7 +101,10 @@ class LaravelGccServiceProvider extends ServiceProvider {
 	 */
 	public function provides()
 	{
-		return array();
+		return array(
+            'gccompiler',
+            'command.gcc.build',
+        );
 	}
 
 }
