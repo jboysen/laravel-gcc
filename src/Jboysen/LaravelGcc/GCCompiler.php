@@ -96,7 +96,7 @@ class GCCompiler
 
         if (!\File::exists(static::storagePath($this->filename)))
         {
-            $this->cleanupOldFiles();
+            $this->_cleanupOldFiles();
 
             $response = $this->_compile();
 
@@ -118,7 +118,7 @@ class GCCompiler
     private function _compile()
     {
         $compiler = new \Closure\RemoteCompiler();
-        $compiler->_setMode($this->_getMode());
+        $compiler->setMode($this->_getMode());
 
         foreach ($this->files as $path)
         {
@@ -161,8 +161,7 @@ class GCCompiler
 
     public function getCompiledJsPath()
     {
-        $path = $this->config->get('laravel-gcc::build_path', 'js-built');
-        return \URL::to($path . '/' . $this->filename . '.js');
+        return \URL::to($this->config->get('laravel-gcc::build_path', 'js-built') . '/' . $this->filename);
     }
 
     public function getJsDir()
@@ -181,7 +180,7 @@ class GCCompiler
 
         $this->prefix = md5(implode('-', array_keys($this->files)));
 
-        $this->filename = $this->prefix . '_' . md5($mtime . implode('-', $this->files));
+        $this->filename = $this->prefix . '_' . md5($mtime . implode('-', $this->files)) . '.js';
 
         return $this->filename;
     }
@@ -193,7 +192,7 @@ class GCCompiler
      */
     public static function getCompiledFile($filename)
     {
-        $path = static::storagePath($filename);
+        $path = static::storagePath($filename . '.js');
 
         if (!\File::exists($path))
             return \App::abort(404);
@@ -234,10 +233,10 @@ class GCCompiler
         }
     }
 
-    public static function storagePath($filename = null)
+    public static function storagePath($path = null)
     {
-        $path = storage_path() . '/' . static::STORAGE;
-        return $filename ? $path . '/' . $filename . '.js' : $path;
+        $storage = storage_path() . '/' . static::STORAGE;
+        return $path ? $storage . '/' . $path : $storage;
     }
 
 }
