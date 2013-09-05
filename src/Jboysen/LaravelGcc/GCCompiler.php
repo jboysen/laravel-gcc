@@ -8,7 +8,7 @@ class GCCompiler
      * The default path in the storage folder
      */
 
-    const STORAGE = 'js-built';
+    const STORAGE = 'laravel-gcc';
 
     /**
      * Different modes used
