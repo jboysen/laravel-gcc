@@ -1,5 +1,5 @@
 {
-    "name": "jboysen/laravel-closure-compiler",
+    "name": "jboysen/laravel-gcc",
     "keywords": ["minify", "laravel", "closure", "compiler"],
     "description": "Use Google Closure Compiler to minify javascript files in Laravel 4.",
     "licence": "MIT",
