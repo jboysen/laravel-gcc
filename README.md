@@ -9,6 +9,8 @@ Install it via Composer by adding the following to your `composer.json`-file:
 
     "jboysen/laravel-gcc": "dev-master"
 
+NOTE: *you might get an error like `zendframework/zend-http dev-master requires zendframework/zend-stdlib dev-master -> no matching package found.`, just ignore that and run composer again...* 
+
 ...and add the following to the `providers`-array in your `app/config/app.php`:
 
     'Jboysen\LaravelGcc\LaravelGccServiceProvider',
