@@ -5,7 +5,7 @@ This Laravel4 package adds a view-helper `javascript_compiled()`.
 
 ### Installation
 
-Install it via Composer by adding the following to your `composer.json`-file:
+Install it via Composer by adding the following to your `composer.json`-file (the asterix can be changed to an exact version):
 
     "jboysen/laravel-gcc": "1.*"
 
