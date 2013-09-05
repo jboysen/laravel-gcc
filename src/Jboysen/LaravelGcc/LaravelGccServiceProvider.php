@@ -67,7 +67,10 @@ class LaravelGccServiceProvider extends ServiceProvider {
     {
         $storagePath = GCCompiler::storagePath();
         if (!\File::exists($storagePath))
-            \File::makeDirectory($storagePath, 0757);
+        {
+            \File::makeDirectory($storagePath);
+            chmod($storagePath, 0757);
+        }            
     }
 
 	/**
