@@ -9,7 +9,7 @@ Install it via Composer by adding the following to your `composer.json`-file (th
 
     "jboysen/laravel-gcc": "1.*"
 
-NOTE: *you might get an error like `zendframework/zend-http dev-master requires zendframework/zend-stdlib dev-master -> no matching package found.`, just ignore that and run composer again...* 
+NOTE: *if you get this error: `zendframework/zend-http dev-master requires zendframework/zend-stdlib dev-master -> no matching package found.`, you might have got this [error](https://github.com/composer/composer/issues/2218)..* 
 
 ...and add the following to the `providers`-array in your `app/config/app.php`:
 
