@@ -54,7 +54,6 @@ class GCCompiler
      * and the filename as key
      * 
      * @param array $files a string or an array of files
-     * @throws Exception if a file is not present in the file system
      */
     public function setFiles($files)
     {
@@ -71,7 +70,7 @@ class GCCompiler
             {
                 $file = $path . '/' . $filename;
                 if (!\File::exists($file))
-                    throw new Exception("Not found", 404, "");
+                    \App::abort(404, "File {$filename} not found");
                 $this->files[$filename] = $file;
             }
         }
