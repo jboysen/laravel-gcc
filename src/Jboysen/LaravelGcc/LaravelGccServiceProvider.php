@@ -91,7 +91,14 @@ class LaravelGccServiceProvider extends ServiceProvider {
         {
             return new BuildCommand;
         });
-        $this->commands('command.gcc.build');
+        $this->app['command.gcc.clean'] = $this->app->share(function()
+        {
+            return new CleanCommand;
+        });
+        $this->commands(
+                'command.gcc.build',
+                'command.gcc.clean'
+                );
     }
 
 	/**

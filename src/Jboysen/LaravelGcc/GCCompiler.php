@@ -146,7 +146,7 @@ class GCCompiler
                 return \Closure\RemoteCompiler::MODE_ADVANCED_OPTIMIZATIONS;
         }
     }
-
+    
     /**
      * Removes old builds of the current build
      */
@@ -236,6 +236,17 @@ class GCCompiler
     {
         $storage = storage_path() . '/' . static::STORAGE;
         return $path ? $storage . '/' . $path : $storage;
+    }
+    
+    /**
+     * Remove all compiled bundles
+     */
+    public static function cleanup()
+    {
+        foreach (\File::glob(static::storagePath('/*')) as $file)
+        {
+            \File::delete($file);
+        }
     }
 
 }
