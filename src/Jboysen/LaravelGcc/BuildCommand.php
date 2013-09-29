@@ -106,9 +106,7 @@ class BuildCommand extends Command
         {
             foreach ($matches[1] as $bundle)
             {
-                $bundle = str_replace('array(', '', $bundle);
-                $bundle = str_replace('"', '', $bundle);
-                $bundle = str_replace("'", '', $bundle);
+                $bundle = str_replace(array('array(', '[', ']', '"', "'"), '', $bundle);
                 $output[] = explode(',', $bundle);
             }
         }
