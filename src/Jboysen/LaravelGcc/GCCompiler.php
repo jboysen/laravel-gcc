@@ -7,8 +7,17 @@ class GCCompiler
     /**
      * The default path in the storage folder
      */
-
     const STORAGE = 'laravel-gcc';
+    
+    /**
+     * Default public javascript folder
+     */
+    const JS_PATH = 'js';
+    
+    /**
+     * Default url js path
+     */
+    const JS_BUILD_PATH = 'js-built';
 
     /**
      * Different modes used
@@ -41,7 +50,7 @@ class GCCompiler
     private $config = null;
 
     /**
-     * 
+     *
      * @param \Illuminate\Config\Repository $config
      */
     public function __construct($config)
@@ -52,22 +61,21 @@ class GCCompiler
     /**
      * Creates an array with the absolute path to the actual file as value,
      * and the filename as key
-     * 
+     *
      * @param array $files a string or an array of files
      */
     public function setFiles($files)
     {
-        if (!is_array($files))
+        if (!is_array($files)) {
             $files = array($files);
+        }
 
-        if (count($files) > 0)
-        {
+        if (count($files) > 0) {
             $this->files = array();
 
             $path = public_path() . '/' . $this->getJsDir();
 
-            foreach ($files as $filename)
-            {
+            foreach ($files as $filename) {
                 $file = $path . '/' . $filename;
                 if (!\File::exists($file))
                     \App::abort(404, "File {$filename} not found");
@@ -83,8 +91,8 @@ class GCCompiler
 
     /**
      * Compiles using Google Closure Compiler
-     * 
-     * @param array $files string or array of files
+     *
+     * @param  array   $files string or array of files
      * @return boolean whether successful or not
      */
     public function compile($files = array())
@@ -93,25 +101,24 @@ class GCCompiler
 
         $this->_calculateFilename();
 
-        if (!\File::exists(static::storagePath($this->filename)))
-        {
+        if (!\File::exists(static::storagePath($this->filename))) {
             $this->_cleanupOldFiles();
 
             $response = $this->_compile();
 
-            if ($response->hasErrors())
-            {
+            if ($response->hasErrors()) {
                 \Log::error(var_export($response->getErrors(), true));
             }
-            
+
             \File::put(static::storagePath($this->filename), $response->getCompiledCode());
+            chmod(static::storagePath($this->filename), 0757);
         }
-        
+
         return \File::size(static::storagePath($this->filename)) > 0 ? true : false;
     }
 
     /**
-     * 
+     *
      * @return \Closure\CompilerInterface
      */
     private function _compile()
@@ -119,24 +126,22 @@ class GCCompiler
         $compiler = new \Closure\RemoteCompiler();
         $compiler->setMode($this->_getMode());
 
-        foreach ($this->files as $path)
-        {
+        foreach ($this->files as $path) {
             $compiler->addLocalFile($path);
         }
 
         $compiler->compile();
-        
+
         return $compiler->getCompilerResponse();
     }
 
     /**
-     * 
+     *
      * @return string Translated mode constant
      */
     private function _getMode()
     {
-        switch ($this->config->get('laravel-gcc::gcc_mode', 1))
-        {
+        switch ($this->config->get('laravel-gcc::gcc_mode', static::MODE_WHITESPACE)) {
             case static::MODE_WHITESPACE:
             default:
                 return \Closure\RemoteCompiler::MODE_WHITESPACE_ONLY;
@@ -146,34 +151,32 @@ class GCCompiler
                 return \Closure\RemoteCompiler::MODE_ADVANCED_OPTIMIZATIONS;
         }
     }
-    
+
     /**
      * Removes old builds of the current build
      */
     private function _cleanupOldFiles()
     {
-        foreach (\File::glob(static::storagePath() . '/' . $this->prefix . '_*') as $file)
-        {
+        foreach (\File::glob(static::storagePath() . '/' . $this->prefix . '_*') as $file) {
             \File::delete($file);
         }
     }
 
     public function getCompiledJsPath()
     {
-        return \URL::to($this->config->get('laravel-gcc::build_path', 'js-built') . '/' . $this->filename);
+        return \URL::to($this->config->get('laravel-gcc::build_path', static::JS_BUILD_PATH) . '/' . $this->filename);
     }
 
     public function getJsDir()
     {
-        return $this->config->get('laravel-gcc::public_path', 'js');
+        return $this->config->get('laravel-gcc::public_path', static::JS_PATH);
     }
 
     private function _calculateFilename()
     {
         $mtime = 0;
 
-        foreach ($this->files as $path)
-        {
+        foreach ($this->files as $path) {
             $mtime += \File::lastModified($path);
         }
 
@@ -185,17 +188,18 @@ class GCCompiler
     }
 
     /**
-     * 
-     * @param string $filename Of build file
+     *
+     * @param  string    $filename Of build file
      * @return \Response Contents if first request, else cache header
      */
     public static function getCompiledFile($filename)
     {
         $path = static::storagePath($filename . '.js');
 
-        if (!\File::exists($path))
+        if (!\File::exists($path)) {
             return \App::abort(404);
-
+        }
+        
         $headerMod = \Request::header('If-Modified-Since');
 
         $headers = array(
@@ -205,21 +209,16 @@ class GCCompiler
 
         $headerGzip = \Request::header('Accept-Encoding');
 
-        if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode'))
-        {
+        if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode')) {
             $headers['Content-Encoding'] = 'gzip';
         }
 
-        if ($headerMod && strtotime($headerMod) == \File::lastModified($path))
-        {
+        if ($headerMod && strtotime($headerMod) == \File::lastModified($path)) {
             return \Response::make(null, 304, $headers);
-        }
-        else
-        {
+        } else {
             $contents = \File::get($path);
 
-            if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode'))
-            {
+            if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode')) {
                 $contents = gzencode($contents, 9);
             }
 
@@ -228,6 +227,7 @@ class GCCompiler
                 'Expires'        => gmdate('D, d M Y H:i:s \G\M\T', time() + 60 * 60 * 24 * 7),
                 'Content-Length' => strlen($contents)
             ));
+
             return \Response::make($contents, 200, $headers);
         }
     }
@@ -235,20 +235,18 @@ class GCCompiler
     public static function storagePath($path = null)
     {
         $storage = storage_path() . '/' . static::STORAGE;
+
         return $path ? $storage . '/' . $path : $storage;
     }
-    
+
     /**
      * Remove all compiled bundles
      */
     public static function cleanup()
     {
-        foreach (\File::glob(static::storagePath('/*')) as $file)
-        {
+        foreach (\File::glob(static::storagePath('/*')) as $file) {
             \File::delete($file);
         }
     }
 
 }
-
-?>
