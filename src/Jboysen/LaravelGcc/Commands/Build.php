@@ -1,10 +1,10 @@
 <?php
 
-namespace Jboysen\LaravelGcc;
+namespace Jboysen\LaravelGcc\Commands;
 
 use Illuminate\Console\Command;
 
-class BuildCommand extends Command
+class Build extends Command
 {
 
     /**
@@ -29,24 +29,21 @@ class BuildCommand extends Command
     public function fire()
     {
         $bundles = $this->_getBundles();
-        
-        foreach ($bundles as $bundle)
-        {
+
+        foreach ($bundles as $bundle) {
             $this->comment('Compiling bundle:');
-            
-            foreach ($bundle as $js)
-            {
+
+            foreach ($bundle as $js) {
                 $this->line('  ' . $js);
             }
-            
+
             $gcc = \App::make('gccompiler');
-            
-            if ($gcc->compile($bundle))
-            {
+
+            if ($gcc->compile($bundle)) {
                 $this->comment('Success...');
             }
         }
-        
+
         $this->comment('All bundles are now compiled.');
     }
 
@@ -73,46 +70,43 @@ class BuildCommand extends Command
     }
 
     /**
-     * 
-     * 
+     *
+     *
      * @return array
      */
     private function _getBundles()
     {
         $this->comment('Searching files...');
-        
+
         $bundles = array();
-        
-        foreach (\File::allFiles(app_path('views')) as $file)
-        {
+
+        foreach (\File::allFiles(app_path('views')) as $file) {
             echo '.';
-            
+
             foreach ($this->_findMatches($file) as $bundle)
                 $bundles[] = $bundle;
         }
-        
+
         echo "\n";
-        
+
         return $bundles;
     }
 
     private function _findMatches($file)
     {
         $output = array();
-        
+
         $contents = str_replace(' ', '', preg_replace('/\s+/', ' ', \File::get($file)));
-        
-        if (preg_match_all("/javascript_compiled\\((.*?)\\)/", $contents, $matches))
-        {
-            foreach ($matches[1] as $bundle)
-            {
+
+        if (preg_match_all("/javascript_compiled\\((.*?)\\)/", $contents, $matches)) {
+            foreach ($matches[1] as $bundle) {
                 $bundle = str_replace('array(', '', $bundle);
                 $bundle = str_replace('"', '', $bundle);
                 $bundle = str_replace("'", '', $bundle);
                 $output[] = explode(',', $bundle);
             }
         }
-        
+
         return $output;
     }
 

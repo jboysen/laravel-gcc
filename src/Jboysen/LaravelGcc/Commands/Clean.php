@@ -1,10 +1,10 @@
 <?php
 
-namespace Jboysen\LaravelGcc;
+namespace Jboysen\LaravelGcc\Commands;
 
 use Illuminate\Console\Command;
 
-class CleanCommand extends Command
+class Clean extends Command
 {
 
     /**
@@ -28,8 +28,9 @@ class CleanCommand extends Command
      */
     public function fire()
     {
-        GCCompiler::cleanup();
-        
+        $gcc = \App::make('gccompiler');
+        $gcc::cleanup();
+
         $this->comment('All compiled bundles are now removed.');
     }
 
