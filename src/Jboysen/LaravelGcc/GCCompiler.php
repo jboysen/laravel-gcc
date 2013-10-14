@@ -73,12 +73,13 @@ class GCCompiler
         if (count($files) > 0) {
             $this->files = array();
 
-            $path = public_path() . '/' . $this->getJsDir();
+            $path = public_path() . DIRECTORY_SEPARATOR . $this->getJsDir();
 
             foreach ($files as $filename) {
                 $file = $path . '/' . $filename;
-                if (!\File::exists($file))
+                if (!\File::exists($file)) {
                     \App::abort(404, "File {$filename} not found");
+                }
                 $this->files[$filename] = $file;
             }
         }
@@ -157,14 +158,14 @@ class GCCompiler
      */
     private function _cleanupOldFiles()
     {
-        foreach (\File::glob(static::storagePath() . '/' . $this->prefix . '_*') as $file) {
+        foreach (\File::glob(static::storagePath() . DIRECTORY_SEPARATOR . $this->prefix . '_*') as $file) {
             \File::delete($file);
         }
     }
 
     public function getCompiledJsPath()
     {
-        return \URL::to($this->config->get('laravel-gcc::build_path', static::JS_BUILD_PATH) . '/' . $this->filename);
+        return \URL::to($this->config->get('laravel-gcc::build_path', static::JS_BUILD_PATH) . DIRECTORY_SEPARATOR . $this->filename);
     }
 
     public function getJsDir()
@@ -234,9 +235,9 @@ class GCCompiler
 
     public static function storagePath($path = null)
     {
-        $storage = storage_path() . '/' . static::STORAGE;
+        $storage = storage_path() . DIRECTORY_SEPARATOR . static::STORAGE;
 
-        return $path ? $storage . '/' . $path : $storage;
+        return $path ? $storage . DIRECTORY_SEPARATOR . $path : $storage;
     }
 
     /**
@@ -244,7 +245,7 @@ class GCCompiler
      */
     public static function cleanup()
     {
-        foreach (\File::glob(static::storagePath('/*')) as $file) {
+        foreach (\File::glob(static::storagePath(DIRECTORY_SEPARATOR . '*')) as $file) {
             \File::delete($file);
         }
     }
