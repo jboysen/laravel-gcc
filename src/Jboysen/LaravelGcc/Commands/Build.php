@@ -97,12 +97,10 @@ class Build extends Command
         $output = array();
 
         $contents = str_replace(' ', '', preg_replace('/\s+/', ' ', \File::get($file)));
-
+        
         if (preg_match_all("/javascript_compiled\\((.*?)\\)/", $contents, $matches)) {
             foreach ($matches[1] as $bundle) {
-                $bundle = str_replace('array(', '', $bundle);
-                $bundle = str_replace('"', '', $bundle);
-                $bundle = str_replace("'", '', $bundle);
+                $bundle = str_replace(array('array(', '[', ']', '"', "'"), '', $bundle);
                 $output[] = explode(',', $bundle);
             }
         }
