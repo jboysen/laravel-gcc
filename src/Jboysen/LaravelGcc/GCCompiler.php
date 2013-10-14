@@ -35,13 +35,13 @@ class GCCompiler
     /**
      * @var string complete filename (without '.js')
      */
-    private $filename = '';
+    private $filename = null;
 
     /**
      * @var string a prefix used to identify old builds of a new build
      * that needs recompilation
      */
-    private $prefix = '';
+    private $prefix = null;
 
     /**
      *
@@ -76,7 +76,7 @@ class GCCompiler
             $path = public_path() . DIRECTORY_SEPARATOR . $this->getJsDir();
 
             foreach ($files as $filename) {
-                $file = $path . '/' . $filename;
+                $file = $path . DIRECTORY_SEPARATOR . $filename;
                 if (!\File::exists($file)) {
                     \App::abort(404, "File {$filename} not found");
                 }
@@ -115,7 +115,8 @@ class GCCompiler
             chmod(static::storagePath($this->filename), 0757);
         }
 
-        return \File::size(static::storagePath($this->filename)) > 0 ? true : false;
+        // if there was any errors, the compiled file will be empty
+        return \File::size(static::storagePath($this->filename)) > 0;
     }
 
     /**
@@ -138,7 +139,7 @@ class GCCompiler
 
     /**
      *
-     * @return string Translated mode constant
+     * @return string Converted mode constant
      */
     private function _getMode()
     {
@@ -163,7 +164,10 @@ class GCCompiler
         }
     }
 
-    public function getCompiledJsPath()
+    /**
+     * @return string URL to the filename
+     */
+    public function getCompiledJsURL()
     {
         return \URL::to($this->config->get('laravel-gcc::build_path', static::JS_BUILD_PATH) . DIRECTORY_SEPARATOR . $this->filename);
     }
@@ -173,6 +177,12 @@ class GCCompiler
         return $this->config->get('laravel-gcc::public_path', static::JS_PATH);
     }
 
+    /**
+     * Create filename based on the filename and the modification time of the
+     * files. This ensures that we only recompile when the files have been 
+     * changed.
+     * @return string Filename
+     */
     private function _calculateFilename()
     {
         $mtime = 0;
