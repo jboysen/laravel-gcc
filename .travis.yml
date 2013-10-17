@@ -7,10 +7,11 @@ php:
 
 before_script:
   - composer self-update
-  - composer install --dev --no-interaction
-  - composer require satooshi/php-coveralls:~0.6 --prefer-source --no-interaction --dev
+  - composer require satooshi/php-coveralls:dev-master --no-interaction --dev
 
-script: phpunit -c phpunit.xml --coverage-text
+script:
+  - mkdir -p build/logs
+  - phpunit --coverage-clover build/logs/clover.xml
 
 after_script:
   - php vendor/bin/coveralls -v
