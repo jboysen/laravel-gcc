@@ -4,6 +4,11 @@ Laravel4 Google Closure Compiler
 This Laravel4 package adds a view-helper `javascript_compiled()` to minimize a single javascript file or bundles of 
 several javascript files. Everything is done using [Google Closure Compiler](https://developers.google.com/closure/compiler/).
 
+[![Latest Stable Version](https://poser.pugx.org/jboysen/laravel-gcc/v/stable.png)](https://packagist.org/packages/jboysen/laravel-gcc) 
+[![Total Downloads](https://poser.pugx.org/jboysen/laravel-gcc/downloads.png)](https://packagist.org/packages/jboysen/laravel-gcc)
+[![Build Status](https://travis-ci.org/jboysen/laravel-gcc.png?branch=master)](https://travis-ci.org/jboysen/laravel-gcc)
+[![Coverage Status](https://coveralls.io/repos/jboysen/laravel-gcc/badge.png?branch=master)](https://coveralls.io/r/jboysen/laravel-gcc?branch=master)
+
 ## Installation
 
 Install it via Composer by adding the following to your `composer.json`-file (the asterix can be changed to an exact version):
