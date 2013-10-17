@@ -67,3 +67,7 @@ the web application.
     
 This command will scan all files in the `/app/views`-directory and find all uses of the view-helper described above, and
 compile the bundles immediately, making sure the users won't experience any long response times.
+
+#### `gcc:clean`
+
+Remove all files from the `/app/storage/laravel-gcc`-folder. This task might be useful in deployment-procedures.
