@@ -20,6 +20,8 @@ class Build extends Command
      * @var string
      */
     protected $description = 'Compile all bundles offline';
+    
+    private $gcc = null;
 
     /**
      * Execute the console command.
@@ -27,20 +29,21 @@ class Build extends Command
      * @return void
      */
     public function fire()
-    {
+    {        
         $bundles = $this->_getBundles();
+        $gcc = \App::make('gcc');
 
         foreach ($bundles as $bundle) {
+            $gcc->reset();
+            
             $this->comment('Compiling bundle:');
 
             foreach ($bundle as $js) {
                 $this->line('  ' . $js);
             }
 
-            $gcc = \App::make('gccompiler');
-
             if ($gcc->compile($bundle)) {
-                $this->comment('Success...');
+                $this->comment('-> ' . $gcc->getCompiledJsURL());
             }
         }
 
@@ -81,31 +84,17 @@ class Build extends Command
         $bundles = array();
 
         foreach (\File::allFiles(app_path('views')) as $file) {
-            echo '.';
+            $this->getOutput()->write('.');
+                    
 
-            foreach ($this->_findMatches($file) as $bundle)
+            foreach (\Jboysen\LaravelGcc\GCCompiler::findHelperMatches(\File::get($file)) as $bundle) {
                 $bundles[] = $bundle;
-        }
-
-        echo "\n";
-
-        return $bundles;
-    }
-
-    private function _findMatches($file)
-    {
-        $output = array();
-
-        $contents = str_replace(' ', '', preg_replace('/\s+/', ' ', \File::get($file)));
-        
-        if (preg_match_all("/javascript_compiled\\((.*?)\\)/", $contents, $matches)) {
-            foreach ($matches[1] as $bundle) {
-                $bundle = str_replace(array('array(', '[', ']', '"', "'"), '', $bundle);
-                $output[] = explode(',', $bundle);
             }
         }
 
-        return $output;
+        $this->getOutput()->writeln('Done!');
+
+        return $bundles;
     }
 
 }

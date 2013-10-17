@@ -77,9 +77,8 @@ class GCCompiler
 
             foreach ($files as $filename) {
                 $file = $path . DIRECTORY_SEPARATOR . $filename;
-                if (!\File::exists($file)) {
-                    \App::abort(404, "File {$filename} not found");
-                }
+                if (!\File::exists($file)) 
+                    \App::abort(404, "File {$file} not found");
                 $this->files[$filename] = $file;
             }
         }
@@ -125,7 +124,7 @@ class GCCompiler
      */
     private function _compile()
     {
-        $compiler = new \Closure\RemoteCompiler();
+        $compiler = \App::make('gcc.compiler');
         $compiler->setMode($this->_getMode());
 
         foreach ($this->files as $path) {
@@ -169,12 +168,20 @@ class GCCompiler
      */
     public function getCompiledJsURL()
     {
+        $this->_calculateFilename();
         return \URL::to($this->config->get('laravel-gcc::build_path', static::JS_BUILD_PATH) . DIRECTORY_SEPARATOR . $this->filename);
     }
 
     public function getJsDir()
     {
         return $this->config->get('laravel-gcc::public_path', static::JS_PATH);
+    }
+    
+    public function reset()
+    {
+        $this->filename = null;
+        $this->prefix = null;
+        $this->files = array();
     }
 
     /**
@@ -185,16 +192,17 @@ class GCCompiler
      */
     private function _calculateFilename()
     {
-        $mtime = 0;
+        if ($this->filename === null) {
+            $mtime = 0;
 
-        foreach ($this->files as $path) {
-            $mtime += \File::lastModified($path);
+            foreach ($this->files as $path) {
+                $mtime += \File::lastModified($path);
+            }
+
+            $this->prefix = md5(implode('-', array_keys($this->files)));
+
+            $this->filename = $this->prefix . '_' . md5($mtime . implode('-', $this->files)) . '.js';
         }
-
-        $this->prefix = md5(implode('-', array_keys($this->files)));
-
-        $this->filename = $this->prefix . '_' . md5($mtime . implode('-', $this->files)) . '.js';
-
         return $this->filename;
     }
 
@@ -219,7 +227,7 @@ class GCCompiler
         );
 
         $headerGzip = \Request::header('Accept-Encoding');
-
+        
         if ($headerGzip && str_contains($headerGzip, 'gzip') && function_exists('gzencode')) {
             $headers['Content-Encoding'] = 'gzip';
         }
@@ -258,6 +266,27 @@ class GCCompiler
         foreach (\File::glob(static::storagePath(DIRECTORY_SEPARATOR . '*')) as $file) {
             \File::delete($file);
         }
+    }
+    
+    /**
+     * Find all occurences of javascript_compiled
+     * @param string $contents Usually content of a file
+     * @return array Of parameters to found javascript_compiled()
+     */
+    public static function findHelperMatches($contents)
+    {
+        $output = array();
+
+        $contents = str_replace(' ', '', preg_replace('/\s+/', ' ', $contents));
+        
+        if (preg_match_all("/javascript_compiled\\((.*?)\\)/", $contents, $matches)) {
+            foreach ($matches[1] as $bundle) {
+                $bundle = str_replace(array('array(', '[', ']', '"', "'"), '', $bundle);
+                $output[] = explode(',', $bundle);
+            }
+        }
+
+        return $output;
     }
 
 }
