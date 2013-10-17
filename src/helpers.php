@@ -10,10 +10,11 @@ if (!function_exists('javascript_compiled')) {
      */
     function javascript_compiled($files)
     {
-        $gcc = App::make('gcc');
+        $gcc = \App::make('gcc');
+        $gcc->reset();
         $gcc->setFiles($files);
 
-        if (in_array(App::environment(), \Config::get('laravel-gcc::env')) && $gcc->compile()) {
+        if (in_array(\App::environment(), \Config::get('laravel-gcc::env')) && $gcc->compile()) {
             return \HTML::script($gcc->getCompiledJsURL());
         }
 
