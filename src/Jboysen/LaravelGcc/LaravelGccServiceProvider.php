@@ -44,7 +44,8 @@ class LaravelGccServiceProvider extends ServiceProvider
      */
     protected function registerGCCompiler()
     {
-        $this->app['gccompiler'] = $this->app->share(function ($app) {
+        $this->app->bind('gcc.compiler', '\Closure\RemoteCompiler');
+        $this->app['gcc'] = $this->app->share(function ($app) {
                     return new GCCompiler($app['config']);
                 });
     }
@@ -57,7 +58,7 @@ class LaravelGccServiceProvider extends ServiceProvider
     protected function registerRoutes()
     {
         $this->app->booting(function($app) {
-                    $buildPath = $app['config']->get('laravel-gcc::build_path', 'js-built');
+                    $buildPath = $app['config']->get('laravel-gcc::build_path', GCCompiler::JS_BUILD_PATH);
 
                     $app['router']->get($buildPath . '/{filename}.js', function ($filename) {
                                 return GCCompiler::getCompiledFile($filename);
@@ -80,9 +81,7 @@ class LaravelGccServiceProvider extends ServiceProvider
     }
 
     /**
-     *
-     *
-     * @return void
+     * @codeCoverageIgnore
      */
     protected function registerCommands()
     {
@@ -93,7 +92,8 @@ class LaravelGccServiceProvider extends ServiceProvider
                     return new Commands\Clean;
                 });
         $this->commands(
-                'command.gcc.build', 'command.gcc.clean'
+                'command.gcc.build', 
+                'command.gcc.clean'
         );
     }
 
@@ -101,6 +101,7 @@ class LaravelGccServiceProvider extends ServiceProvider
      * Get the services provided by the provider.
      *
      * @return array
+     * @codeCoverageIgnore
      */
     public function provides()
     {

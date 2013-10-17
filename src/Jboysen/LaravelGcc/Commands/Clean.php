@@ -28,7 +28,7 @@ class Clean extends Command
      */
     public function fire()
     {
-        $gcc = \App::make('gccompiler');
+        $gcc = \App::make('gcc');
         $gcc::cleanup();
 
         $this->comment('All compiled bundles are now removed.');

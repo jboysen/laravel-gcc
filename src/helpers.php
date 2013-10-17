@@ -10,11 +10,11 @@ if (!function_exists('javascript_compiled')) {
      */
     function javascript_compiled($files)
     {
-        $gcc = App::make('gccompiler');
+        $gcc = App::make('gcc');
         $gcc->setFiles($files);
 
         if (in_array(App::environment(), \Config::get('laravel-gcc::env')) && $gcc->compile()) {
-            return \HTML::script($gcc->getCompiledJsPath());
+            return \HTML::script($gcc->getCompiledJsURL());
         }
 
         $dir = $gcc->getJsDir();
